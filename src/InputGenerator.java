@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import solutions.mainsolution.src.Song;
+import solutions.mainsolution.Project3.src.Song;
 
 import static java.lang.Math.min;
 

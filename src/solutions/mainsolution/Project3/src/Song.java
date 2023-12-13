@@ -1,4 +1,4 @@
-package solutions.mainsolution.src;
+package solutions.mainsolution.Project3.src;
 
 public class Song {
 

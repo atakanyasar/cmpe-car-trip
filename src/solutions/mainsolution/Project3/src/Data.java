@@ -1,4 +1,4 @@
-package solutions.mainsolution.src;
+package solutions.mainsolution.Project3.src;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
