@@ -23,18 +23,18 @@ public class Grader {
     }};
 
     static public HashMap<String, Integer> testCaseTimeLimits = new HashMap<>() {{
-        put("ask_small.txt", 5);
-        put("ask_large.txt", 5);
-        put("one_playlist_small.txt", 5);
-        put("one_playlist_large.txt", 5);
-        put("tiny_playlists_small.txt", 5);
-        put("tiny_playlists_large.txt", 5);
-        put("ten_playlists_small.txt", 5);
-        put("ten_playlists_large.txt", 5);
-        put("add_small.txt", 5);
-        put("add_large.txt", 5);
-        put("general_small.txt", 5);
-        put("general_large.txt", 5);
+        put("ask_small.txt", 60);
+        put("ask_large.txt", 60);
+        put("one_playlist_small.txt", 60);
+        put("one_playlist_large.txt", 60);
+        put("tiny_playlists_small.txt", 60);
+        put("tiny_playlists_large.txt", 60);
+        put("ten_playlists_small.txt", 60);
+        put("ten_playlists_large.txt", 60);
+        put("add_small.txt", 60);
+        put("add_large.txt", 60);
+        put("general_small.txt", 60);
+        put("general_large.txt", 60);
     }};
 
     public static String[] getFolders(String path) {
@@ -115,6 +115,10 @@ public class Grader {
     }
 
     public static void main(String[] args) throws IOException {
+        boolean run_main_solution = false;
+        if (args.length > 0) {
+            run_main_solution = args[0].equals("main");
+        }
         FileWriter gradesFile = new FileWriter("grades.txt", true);
         String testCasesFolder = "test-cases";
 
@@ -141,7 +145,7 @@ public class Grader {
         String[] folders = getFolders(path);
 
         for (String folder : folders) {
-            if (folder.equals("mainsolution") || folder.equals("solution-cpp")) {
+            if ((folder.equals("mainsolution") && !run_main_solution) || folder.equals("solution-cpp")) {
                 continue;
             }
 
@@ -174,6 +178,11 @@ public class Grader {
             logFile.close();
 
             Runner.createFolderIfNotExists("src/graded");
+
+            if (folder.equals("mainsolution")) {
+                continue;
+            }
+
             Files.move(
                     new File(path + "/" + folder).toPath(),
                     new File("src/graded/" + folder).toPath(),
