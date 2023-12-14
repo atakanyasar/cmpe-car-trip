@@ -37,7 +37,7 @@ public class InputGenerator {
             inEpicBlend[2] = false;
         }
 
-        public boolean highScoredInCategory(int category, solutions.mainsolution.Project3.src.Song song) {
+        public boolean highScoredInCategory(int category, Song song) {
             return (categoryScore[category] == song.categoryScore[category] && this.title.compareTo(song.title) < 0) ||
                     categoryScore[category] > song.categoryScore[category];
         }
