@@ -1,6 +1,4 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -62,6 +60,13 @@ public class Runner {
             }
             Process process = Runtime.getRuntime().exec(command);
             process.waitFor();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                logFile.write(line + "\n");
+            }
+            reader.close();
 
             if (process.exitValue() != 0) {
                 logFile.write("Error compiling solution: " + command + "\n");
