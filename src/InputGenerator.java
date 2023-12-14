@@ -4,8 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import solutions.mainsolution.Project3.src.Song;
-
 import static java.lang.Math.min;
 
 public class InputGenerator {
@@ -17,6 +15,34 @@ public class InputGenerator {
 
     static String inputsFolder = "test-cases/inputs";
     static String outputsFolder = "test-cases/outputs";
+
+    private class Song {
+
+        public int id;
+        public String title;
+        public int totalStreams;
+        public int[] categoryScore = new int[3];
+        public boolean[] inEpicBlend = new boolean[3];
+
+        public Song(String line) {
+            String[] elements = line.split(" ");
+            id = Integer.parseInt(elements[0]);
+            title = elements[1];
+            totalStreams = Integer.parseInt(elements[2]);
+            categoryScore[0] = Integer.parseInt(elements[3]);
+            categoryScore[1] = Integer.parseInt(elements[4]);
+            categoryScore[2] = Integer.parseInt(elements[5]);
+            inEpicBlend[0] = false;
+            inEpicBlend[1] = false;
+            inEpicBlend[2] = false;
+        }
+
+        public boolean highScoredInCategory(int category, solutions.mainsolution.Project3.src.Song song) {
+            return (categoryScore[category] == song.categoryScore[category] && this.title.compareTo(song.title) < 0) ||
+                    categoryScore[category] > song.categoryScore[category];
+        }
+
+    }
 
     private static int randomInt(int min, int max) {
         return random.nextInt(max - min + 1) + min;
