@@ -86,7 +86,7 @@ public class Runner {
         if (source.endsWith("-cpp")) {
             command = "Project3 " + String.join(" ", solutionArgs);
         } else {
-            command = "java " + "-cp out " + source + " " + String.join(" ", solutionArgs);
+            command = "java " + "-cp out " + "solutions." + source + ".Project3.src.Project3 " + String.join(" ", solutionArgs);
         }
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -145,7 +145,7 @@ public class Runner {
 
                     String outputFile = getOutputFileName(inputFilePath, solutionsOutputFolder);
                     String[] solutionArgs = {songsFile, inputFilePath, outputFile};
-                    runSolution( "Project3", solutionArgs, logFile, inputFile, Grader.testCaseTimeLimits.get(inputFile));
+                    runSolution(solutionName, solutionArgs, logFile, inputFile, Grader.testCaseTimeLimits.get(inputFile));
                 }
             }
         } catch (Exception e) {
