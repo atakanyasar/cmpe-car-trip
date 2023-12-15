@@ -52,7 +52,12 @@ public class Runner {
         if (source.endsWith("-cpp")) {
             processBuilder = new ProcessBuilder("g++", "-std=c++11", source + "/main.cpp", "-o", "main");
         } else {
-            processBuilder = new ProcessBuilder("javac", source + "/Project3/src/*.java", "-d", "out");
+            if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                processBuilder = new ProcessBuilder("javac", source + "/Project3/src/*.java", "-d", "out");
+            } else {
+                processBuilder = new ProcessBuilder("sh", "-c",
+                        "find " + source + "/Project3/src" + " -name '*.java' -exec javac -d out" + " {} +");
+            }
         }
         try {
             if (!Files.exists(Path.of("out/"))) {
