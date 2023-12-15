@@ -48,17 +48,17 @@ public class Runner {
     }
 
     private static boolean compileSolution(String source, FileWriter logFile) {
-        String command;
+        ProcessBuilder processBuilder;
         if (source.endsWith("-cpp")) {
-             command = "g++ -std=c++11 " + source + "/main.cpp -o main";
+            processBuilder = new ProcessBuilder("g++", "-std=c++11", source + "/main.cpp", "-o", "main");
         } else {
-            command = "javac " + source + "/Project3/src/*.java" + " -d out";
+            processBuilder = new ProcessBuilder("javac", source + "/Project3/src/*.java", "-d", "out");
         }
         try {
             if (!Files.exists(Path.of("out/"))) {
                 Files.createDirectory(new File("out").toPath());
             }
-            Process process = Runtime.getRuntime().exec(command);
+            Process process = processBuilder.start();
             process.waitFor();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -69,8 +69,8 @@ public class Runner {
             reader.close();
 
             if (process.exitValue() != 0) {
-                logFile.write("Error compiling solution: " + command + "\n");
-                System.out.println("Error compiling solution: " + command);
+                logFile.write("Error compiling solution: " + processBuilder.command() + "\n");
+                System.out.println("Error compiling solution: " + processBuilder.command());
                 return false;
             }
 
