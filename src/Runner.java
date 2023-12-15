@@ -98,6 +98,14 @@ public class Runner {
             } else if (process.exitValue() != 0) {
                 logFile.write("Error running solution: " + testCase + "\n");
                 System.out.println("Error running solution: " + testCase);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    logFile.write(line + "\n");
+                }
+                reader.close();
+
                 return;
             }
             logFile.write("Time taken: " + (new Timestamp(System.currentTimeMillis()).getTime() - timestamp.getTime()) + "ms\n");
