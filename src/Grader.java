@@ -2,11 +2,19 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class Grader {
 
+    static String testCasesFolder = "test-cases";
+    static String songsFile = testCasesFolder + "/songs.txt";
+    static String inputsFolder = testCasesFolder + "/inputs";
+    static String outputsFolder = testCasesFolder + "/outputs";
+    static String submissionsPath = "src/solutions";
+    static String mainSolutionName = "mainsolution";
+    static String[] inputFiles = FilesUtil.getFilesInDirectoryWithExtension(Grader.inputsFolder, "txt");
+
+
+    static public HashMap<String, Long> testCaseTimeLimits = new HashMap<>();
     static HashMap<String, Integer> testCasePoints = new HashMap<>() {{
         put("ask_small.txt", 6);
         put("ask_large.txt", 4);
@@ -21,39 +29,6 @@ public class Grader {
         put("general_small.txt", 12);
         put("general_large.txt", 8);
     }};
-
-    static public HashMap<String, Integer> testCaseTimeLimits = new HashMap<>() {{
-        put("ask_small.txt", 60);
-        put("ask_large.txt", 60);
-        put("one_playlist_small.txt", 60);
-        put("one_playlist_large.txt", 60);
-        put("tiny_playlists_small.txt", 60);
-        put("tiny_playlists_large.txt", 60);
-        put("ten_playlists_small.txt", 60);
-        put("ten_playlists_large.txt", 60);
-        put("add_small.txt", 60);
-        put("add_large.txt", 60);
-        put("general_small.txt", 60);
-        put("general_large.txt", 60);
-    }};
-
-    public static String[] getFolders(String path) {
-        return new File(path).list((current, name) -> new File(current, name).isDirectory());
-    }
-
-    public static String[] getFilesInDirectory(String directory, String extension) {
-        File folder = new File(directory);
-        File[] listOfFiles = folder.listFiles();
-        assert listOfFiles != null;
-        String[] fileNames = new String[listOfFiles.length];
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if (!listOfFiles[i].isFile() || !Runner.getFileExtension(listOfFiles[i].getName()).equals(extension)) {
-                continue;
-            }
-            fileNames[i] = listOfFiles[i].getName();
-        }
-        return  fileNames;
-    }
 
     public static boolean diffChecker(String outputFileName, String expectedOutputFileName) {
         StringBuilder outputBuffer = new StringBuilder();
@@ -84,51 +59,15 @@ public class Grader {
         return outputBuffer.toString().contentEquals(expectedOutputBuffer);
     }
 
-    private static void unzip(String zipFilePath, String destDir, String specificFolder) {
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFilePath))) {
-
-            ZipEntry zipEntry = zipInputStream.getNextEntry();
-
-            while (zipEntry != null) {
-                String entryName = zipEntry.getName();
-                if (!entryName.startsWith(specificFolder) || !entryName.endsWith(".java")) {
-                    zipEntry = zipInputStream.getNextEntry();
-                    continue;
-                }
-                try {
-                    Runner.createAllParentFolders(destDir + "/" + entryName);
-                    File newFile = new File(destDir + "/" + entryName);
-                    if (!zipEntry.isDirectory()) {
-                        Files.copy(zipInputStream, newFile.toPath());
-                        System.out.println("Extracted: " + newFile.getAbsolutePath());
-                    }
-                } catch (IOException e) {
-                    System.out.println("Error extracting file: " + e);
-                    e.printStackTrace();
-                }
-
-                zipEntry = zipInputStream.getNextEntry();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void main(String[] args) throws IOException {
-        boolean run_main_solution = false;
-        if (args.length > 0) {
-            run_main_solution = args[0].equals("main");
-        }
+
+        Runner.measureTimeLimits(Grader.mainSolutionName, new FileWriter("src/solutions/mainsolution/log.txt"));
+        FilesUtil.removeFolder("out");
+
+        String[] outputFiles = FilesUtil.getFilesInDirectoryWithExtension(outputsFolder, "txt");
         FileWriter gradesFile = new FileWriter("grades.txt", true);
-        String testCasesFolder = "test-cases";
 
-        String outputFolder = testCasesFolder + "/outputs";
-
-        String[] outputFiles = getFilesInDirectory(outputFolder, "txt");
-
-        String path = "src/solutions";
-
-        for (String zipFile : getFilesInDirectory("zips", "zip")) {
+        for (String zipFile : FilesUtil.getFilesInDirectoryWithExtension("zips", "zip")) {
             if (zipFile.endsWith(".zip")) {
                 String zipName = zipFile.substring(0, zipFile.length() - 4);
                 if (Files.isDirectory(new File("src/graded/" + zipName).toPath())) {
@@ -138,27 +77,27 @@ public class Grader {
                     continue;
                 }
                 System.err.println("Unzipping " + zipFile);
-                unzip( "zips/" + zipFile, path + "/" + zipName, "Project3/src");
+                FilesUtil.unzip( "zips/" + zipFile, submissionsPath + "/" + zipName, "Project3/src");
             }
         }
 
-        String[] folders = getFolders(path);
+        String[] submissions = FilesUtil.getFolders(submissionsPath);
 
-        for (String folder : folders) {
-            if ((folder.equals("mainsolution") && !run_main_solution) || folder.equals("solution-cpp")) {
+        for (String submissionName : submissions) {
+            if (submissionName.equals(mainSolutionName) || submissionName.equals("solution-cpp")) {
                 continue;
             }
 
-            System.out.println("Grading " + folder);
-            FileWriter logFile = new FileWriter(path + "/" + folder + "/log.txt");
-            Runner.run(folder, logFile, false);
+            System.out.println("Grading " + submissionName);
+            FileWriter logFile = new FileWriter(submissionsPath + "/" + submissionName + "/log.txt");
+            Runner.run(submissionName, logFile, false, false);
 
-            String solutionOutputFolder = path + "/" + folder + "/outputs";
+            String solutionOutputFolder = submissionsPath + "/" + submissionName + "/outputs";
 
             int totalPoints = 0;
 
             for (String outputFile : outputFiles) {
-                String outputFileName = outputFolder + "/" + outputFile;
+                String outputFileName = outputsFolder + "/" + outputFile;
                 String expectedOutputFileName = solutionOutputFolder + "/" +  outputFile ;
 
                 if (diffChecker(outputFileName, expectedOutputFileName)) {
@@ -172,20 +111,21 @@ public class Grader {
             }
 
             logFile.write("Total points: " + totalPoints + "\n");
-            gradesFile.write(folder + ": " + totalPoints + "\n");
+            gradesFile.write(submissionName + ": " + totalPoints + "\n");
             System.out.println("Total points: " + totalPoints);
 
             logFile.close();
 
-            Runner.createFolderIfNotExists("src/graded");
+            FilesUtil.createFolderIfNotExists("src/graded");
+            FilesUtil.removeFolder("out");
 
-            if (folder.equals("mainsolution")) {
+            if (submissionName.equals(mainSolutionName)) {
                 continue;
             }
 
             Files.move(
-                    new File(path + "/" + folder).toPath(),
-                    new File("src/graded/" + folder).toPath(),
+                    new File(submissionsPath + "/" + submissionName).toPath(),
+                    new File("src/graded/" + submissionName).toPath(),
                     StandardCopyOption.REPLACE_EXISTING
             );
 
