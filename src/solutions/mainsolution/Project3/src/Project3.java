@@ -1,5 +1,3 @@
-package solutions.mainsolution.Project3.src;
-
 import java.io.FileWriter;
 import java.io.IOException;
 

@@ -1,5 +1,3 @@
-package solutions.mainsolution.Project3.src;
-
 public class Song {
 
     public int id;

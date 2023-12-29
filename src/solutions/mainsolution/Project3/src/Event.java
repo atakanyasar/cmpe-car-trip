@@ -1,5 +1,3 @@
-package solutions.mainsolution.Project3.src;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
