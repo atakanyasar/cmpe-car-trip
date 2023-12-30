@@ -81,7 +81,6 @@ public class Grader {
         FilesUtil.removeFolder("out");
 
         String[] outputFiles = FilesUtil.getFilesInDirectoryWithExtension(outputsFolder, "txt");
-        FileWriter gradesFile = new FileWriter("grades.txt", true);
 
         String[] submissions = FilesUtil.getFolders(submissionsPath);
 
@@ -91,7 +90,9 @@ public class Grader {
             }
 
             System.out.println("Grading " + submissionName);
+            FileWriter gradesFile = new FileWriter("grades.txt", true);
             FileWriter logFile = new FileWriter(submissionsPath + "/" + submissionName + "/log.txt");
+
             Runner.run(submissionName, logFile, false, false);
 
             String solutionOutputFolder = submissionsPath + "/" + submissionName + "/outputs";
@@ -117,24 +118,22 @@ public class Grader {
             System.out.println("Total points: " + totalPoints);
 
             logFile.close();
+            gradesFile.close();
 
             FilesUtil.removeFolder(solutionOutputFolder);
             FilesUtil.createFolderIfNotExists("src/graded");
             FilesUtil.removeFolder("out");
 
-            if (submissionName.equals(mainSolutionName)) {
-                continue;
+            if (!submissionName.equals(mainSolutionName)) {
+                Files.move(
+                        new File(submissionsPath + "/" + submissionName).toPath(),
+                        new File("src/graded/" + submissionName).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
             }
-
-            Files.move(
-                    new File(submissionsPath + "/" + submissionName).toPath(),
-                    new File("src/graded/" + submissionName).toPath(),
-                    StandardCopyOption.REPLACE_EXISTING
-            );
 
         }
 
-        gradesFile.close();
-
     }
+
 }
