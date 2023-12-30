@@ -61,12 +61,6 @@ public class Grader {
 
     public static void main(String[] args) throws IOException {
 
-        Runner.measureTimeLimits(Grader.mainSolutionName, new FileWriter("src/solutions/mainsolution/log.txt"));
-        FilesUtil.removeFolder("out");
-
-        String[] outputFiles = FilesUtil.getFilesInDirectoryWithExtension(outputsFolder, "txt");
-        FileWriter gradesFile = new FileWriter("grades.txt", true);
-
         for (String zipFile : FilesUtil.getFilesInDirectoryWithExtension("zips", "zip")) {
             if (zipFile.endsWith(".zip")) {
                 String zipName = zipFile.substring(0, zipFile.length() - 4);
@@ -76,10 +70,18 @@ public class Grader {
                 if (Files.isDirectory(new File("src/solutions/" + zipName).toPath())) {
                     continue;
                 }
+                FilesUtil.createFolderIfNotExists(submissionsPath + "/" + zipName);
+
                 System.err.println("Unzipping " + zipFile);
                 FilesUtil.unzip( "zips/" + zipFile, submissionsPath + "/" + zipName, "Project3/src");
             }
         }
+
+        Runner.measureTimeLimits(Grader.mainSolutionName, new FileWriter("src/solutions/mainsolution/log.txt"));
+        FilesUtil.removeFolder("out");
+
+        String[] outputFiles = FilesUtil.getFilesInDirectoryWithExtension(outputsFolder, "txt");
+        FileWriter gradesFile = new FileWriter("grades.txt", true);
 
         String[] submissions = FilesUtil.getFolders(submissionsPath);
 
@@ -116,6 +118,7 @@ public class Grader {
 
             logFile.close();
 
+            FilesUtil.removeFolder(solutionOutputFolder);
             FilesUtil.createFolderIfNotExists("src/graded");
             FilesUtil.removeFolder("out");
 
