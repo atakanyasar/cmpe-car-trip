@@ -106,14 +106,14 @@ public class Runner {
 
                     String[] solutionArgs = {Grader.songsFile, inputFilePath, outputFile};
 
-                    long timeLimit = (Grader.testCaseTimeLimits.containsKey(inputFile) ? Grader.testCaseTimeLimits.get(inputFile) * 4 : 300000) ;
+                    long timeLimit = (Grader.testCaseTimeLimits.containsKey(inputFile) ? Grader.testCaseTimeLimits.get(inputFile) : 300000) ;
                     long time = runSolution(solutionName, solutionArgs, logFile, inputFile, timeLimit);
 
                     if (measureTimeLimits) {
-                        Grader.testCaseTimeLimits.put(inputFile, time);
+                        Grader.testCaseTimeLimits.put(inputFile, time * 3);
 
-                        logFile.write("Time limit set to: " + time + "ms for " + inputFile + "\n");
-                        System.out.println("Time limit set to: " + time + "ms for " + inputFile);
+                        logFile.write("Time limit set to: " + time * 3 + "ms for " + inputFile + "\n");
+                        System.out.println("Time limit set to: " + time * 3 + "ms for " + inputFile);
                     }
                 }
             }
