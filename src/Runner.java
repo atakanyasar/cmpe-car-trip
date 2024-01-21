@@ -86,7 +86,7 @@ public class Runner {
 
     public static void run(String solutionName, FileWriter logFile, boolean measureTimeLimits, boolean generateOutputs) {
 
-        String solutionFolder = FilesUtil.getFileInsideFolders(solutionName, Grader.submissionsPath);
+        String solutionFolder = FilesUtil.getFileInsideFolders(solutionName, Grader.solutionsPath);
         String solutionOutputFolder = solutionFolder + "/outputs";
 
         if (generateOutputs) {
@@ -110,10 +110,10 @@ public class Runner {
                     long time = runSolution(solutionName, solutionArgs, logFile, inputFile, timeLimit);
 
                     if (measureTimeLimits) {
-                        Grader.testCaseTimeLimits.put(inputFile, time * 3);
+                        Grader.testCaseTimeLimits.put(inputFile, time * Grader.timeLimitMultiplier);
 
-                        logFile.write("Time limit set to: " + time * 3 + "ms for " + inputFile + "\n");
-                        System.out.println("Time limit set to: " + time * 3 + "ms for " + inputFile);
+                        logFile.write("Time limit set to: " + time * Grader.timeLimitMultiplier + "ms for " + inputFile + "\n");
+                        System.out.println("Time limit set to: " + time * Grader.timeLimitMultiplier + "ms for " + inputFile);
                     }
                 }
             }

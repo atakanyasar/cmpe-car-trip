@@ -12,7 +12,7 @@ src/**outputs
 *.class
 mainsolution
 src/graded
-!zips/mainsolution.zip
+!submissions/mainsolution.zip
 !test-cases/*
 !test-cases/inputs/*.txt
 !test-cases/outputs/*.txt

@@ -9,10 +9,11 @@ public class Grader {
     static String songsFile = testCasesFolder + "/songs.txt";
     static String inputsFolder = testCasesFolder + "/inputs";
     static String outputsFolder = testCasesFolder + "/outputs";
-    static String submissionsPath = "src/solutions";
+    static String solutionsPath = "src/solutions";
     static String mainSolutionName = "mainsolution";
+    static String zipsFolder = "submissions";
     static String[] inputFiles = FilesUtil.getFilesInDirectoryWithExtension(Grader.inputsFolder, "txt");
-
+    static int timeLimitMultiplier = 3;
 
     static public HashMap<String, Long> testCaseTimeLimits = new HashMap<>();
     static HashMap<String, Integer> testCasePoints = new HashMap<>() {{
@@ -29,6 +30,24 @@ public class Grader {
         put("general_small.txt", 12);
         put("general_large.txt", 8);
     }};
+
+    public static void extractSubmissions() {
+        for (String zipFile : FilesUtil.getFilesInDirectoryWithExtension(zipsFolder, "zip")) {
+            if (zipFile.endsWith(".zip")) {
+                String zipName = zipFile.substring(0, zipFile.length() - 4);
+                if (Files.isDirectory(new File("src/graded/" + zipName).toPath())) {
+                    continue;
+                }
+                if (Files.isDirectory(new File(solutionsPath + "/" + zipName).toPath())) {
+                    continue;
+                }
+                FilesUtil.createFolderIfNotExists(solutionsPath + "/" + zipName);
+
+                System.err.println("Unzipping " + zipFile);
+                FilesUtil.unzip( zipsFolder + "/" + zipFile, solutionsPath + "/" + zipName, "Project3/src");
+            }
+        }
+    }
 
     public static boolean diffChecker(String outputFileName, String expectedOutputFileName) {
         StringBuilder outputBuffer = new StringBuilder();
@@ -61,28 +80,14 @@ public class Grader {
 
     public static void main(String[] args) throws IOException {
 
-        for (String zipFile : FilesUtil.getFilesInDirectoryWithExtension("zips", "zip")) {
-            if (zipFile.endsWith(".zip")) {
-                String zipName = zipFile.substring(0, zipFile.length() - 4);
-                if (Files.isDirectory(new File("src/graded/" + zipName).toPath())) {
-                    continue;
-                }
-                if (Files.isDirectory(new File("src/solutions/" + zipName).toPath())) {
-                    continue;
-                }
-                FilesUtil.createFolderIfNotExists(submissionsPath + "/" + zipName);
-
-                System.err.println("Unzipping " + zipFile);
-                FilesUtil.unzip( "zips/" + zipFile, submissionsPath + "/" + zipName, "Project3/src");
-            }
-        }
+        extractSubmissions();
 
         Runner.measureTimeLimits(Grader.mainSolutionName, new FileWriter("src/solutions/mainsolution/log.txt"));
         FilesUtil.removeFolder("out");
 
         String[] outputFiles = FilesUtil.getFilesInDirectoryWithExtension(outputsFolder, "txt");
 
-        String[] submissions = FilesUtil.getFolders(submissionsPath);
+        String[] submissions = FilesUtil.getFolders(solutionsPath);
 
         for (String submissionName : submissions) {
             if (submissionName.equals(mainSolutionName) || submissionName.equals("solution-cpp")) {
@@ -91,11 +96,11 @@ public class Grader {
 
             System.out.println("Grading " + submissionName);
             FileWriter gradesFile = new FileWriter("grades.txt", true);
-            FileWriter logFile = new FileWriter(submissionsPath + "/" + submissionName + "/log.txt");
+            FileWriter logFile = new FileWriter(solutionsPath + "/" + submissionName + "/log.txt");
 
             Runner.run(submissionName, logFile, false, false);
 
-            String solutionOutputFolder = submissionsPath + "/" + submissionName + "/outputs";
+            String solutionOutputFolder = solutionsPath + "/" + submissionName + "/outputs";
 
             int totalPoints = 0;
 
@@ -120,13 +125,15 @@ public class Grader {
             logFile.close();
             gradesFile.close();
 
-            FilesUtil.removeFolder(solutionOutputFolder);
+            if (args[0].equals("-limitedMemory")) {
+                FilesUtil.removeFolder(solutionOutputFolder);
+            }
             FilesUtil.createFolderIfNotExists("src/graded");
             FilesUtil.removeFolder("out");
 
             if (!submissionName.equals(mainSolutionName)) {
                 Files.move(
-                        new File(submissionsPath + "/" + submissionName).toPath(),
+                        new File(solutionsPath + "/" + submissionName).toPath(),
                         new File("src/graded/" + submissionName).toPath(),
                         StandardCopyOption.REPLACE_EXISTING
                 );
